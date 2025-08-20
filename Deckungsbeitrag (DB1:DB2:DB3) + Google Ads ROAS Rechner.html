@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Deckungsbeitrag & ROAS Rechner</title>
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--muted:#334155;--text:#e5e7eb;--accent:#22c55e;--warn:#f59e0b;--error:#ef4444}
+    *{box-sizing:border-box} body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji";background:linear-gradient(180deg,#0b1220,#0f172a);color:var(--text)}
+    .wrap{max-width:1380px;margin:32px auto;padding:24px}
+    .header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:18px}
+    h1{font-size:clamp(22px,3.2vw,34px);margin:0}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .card{grid-column:span 12;background:rgba(17,24,39,.75);backdrop-filter:blur(6px);border:1px solid #1f2937;border-radius:16px;padding:18px}
+    @media(min-width:960px){.span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-5{grid-column:span 5}}
+    label{font-size:12px;color:#94a3b8;display:flex;align-items:center;gap:6px;margin-bottom:6px}
+    input{width:100%;background:#0b1020;border:1px solid #1f2937;color:var(--text);border-radius:12px;padding:10px 12px;font-size:14px;outline:none}
+    input:focus{border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,.25)}
+    .row{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+    .col-6{grid-column:span 12}@media(min-width:720px){.col-6{grid-column:span 6}}
+    .col-4{grid-column:span 12}@media(min-width:720px){.col-4{grid-column:span 4}}
+    .kpi{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:14px;border:1px solid #1f2937;background:linear-gradient(180deg,#0b1020,#0e1526)}
+    .kpi h3{margin:0;font-size:12px;color:#a3a3a3;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+    .kpi .val{font-size:clamp(18px,3vw,28px);font-variant-numeric:tabular-nums}
+    .good{color:var(--accent)} .warn{color:var(--warn)} .bad{color:var(--error)}
+    .note{font-size:12px;color:#9aa7bd}
+    .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid #1f2937;border-radius:999px;padding:8px 10px;background:#0b1020}
+    .btn{cursor:pointer;border:none;border-radius:12px;padding:10px 12px;color:#0b1020;background:#a5b4fc;font-weight:700}
+    .btn:active{transform:translateY(1px)}
+    .footer{margin-top:14px;font-size:12px;color:#94a3b8}
+    .hr{height:1px;background:#1f2937;margin:12px 0}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <h1>Deckungsbeitrag (DB1/DB2/DB3) + Google Ads ROAS Rechner</h1>
+      <div style="display:flex; gap:8px">
+        <button class="btn" id="downloadBtn" title="Download Excel (CSV)">Download CSV</button>
+        <button class="btn" id="resetBtn" title="Reset all">Reset</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- INPUTS -->
+      <section class="card span-6">
+        <h2 style="margin:0 0 8px 0;font-size:18px">Grunddaten</h2>
+        <div class="row">
+          <div class="col-6">
+            <label>Preis pro Einheit (€)</label>
+            <input type="number" id="price" value="49" step="0.01" />
+          </div>
+          <div class="col-6">
+            <label>Menge (verkaufte Einheiten)</label>
+            <input type="number" id="qty" value="100" />
+          </div>
+          <div class="col-6">
+            <label>Variable Kosten pro Einheit (Material, Versand) €</label>
+            <input type="number" id="varPerUnit" value="18" step="0.01" />
+          </div>
+          <div class="col-6">
+            <label>Weitere direkte Produktkosten (fix, z.B. Verpackungsdesign) €</label>
+            <input type="number" id="productFixed" value="200" step="0.01" />
+          </div>
+          <div class="col-6">
+            <label>Google Ads Ausgaben (€)</label>
+            <input type="number" id="adSpend" value="1200" step="0.01" />
+          </div>
+          <div class="col-6">
+            <label>Weitere Fixkosten (z.B. Team, Miete) €</label>
+            <input type="number" id="otherFixed" value="1500" step="0.01" />
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="row">
+          <div class="col-6">
+            <label>Gewünschter ROAS (z.B. 4 = 400%)</label>
+            <input type="number" id="targetROAS" value="4" step="0.1" />
+          </div>
+          <div class="col-6">
+            <label>Optional: Conversion Rate (0–1)</label>
+            <input type="number" id="convRate" value="0.02" step="0.001" />
+          </div>
+        </div>
+      </section>
+
+      <!-- KPIs -->
+      <section class="card span-6">
+        <h2 style="margin:0 0 8px 0;font-size:18px">Kennzahlen</h2>
+        <div class="row">
+          <div class="col-4">
+            <div class="kpi"><h3>Umsatz</h3><div class="val" id="rev">€0</div><div class="note" id="aov">AOV €0</div></div>
+          </div>
+          <div class="col-4">
+            <div class="kpi"><h3>Variable Kosten</h3><div class="val" id="varCost">€0</div><div class="note">pro Einheit + Menge</div></div>
+          </div>
+          <div class="col-4">
+            <div class="kpi"><h3>DB1</h3><div class="val" id="db1">€0</div><div class="note">Umsatz − variable Kosten</div></div>
+          </div>
+          <div class="col-4">
+            <div class="kpi"><h3>DB2</h3><div class="val" id="db2">€0</div><div class="note">DB1 − Google Ads − Produktfix</div></div>
+          </div>
+          <div class="col-4">
+            <div class="kpi"><h3>DB3 / Gewinn vor Steuern</h3><div class="val" id="db3">€0</div><div class="note">DB2 − weitere Fixkosten</div></div>
+          </div>
+          <div class="col-4">
+            <div class="kpi"><h3>ROAS</h3><div class="val" id="roas">0.00×</div><div class="note" id="mer">MER (Umsatz / Gesamtmarketing) inkl. Ads</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Targets / Planning -->
+      <section class="card span-7">
+        <h2 style="margin:0 0 8px 0;font-size:18px">Ziele & Planung</h2>
+        <div class="row">
+          <div class="col-6">
+            <div class="kpi">
+              <h3>Erreichter ROAS</h3>
+              <div class="val" id="roasStatus">0.0×</div>
+              <div class="note">Soll (Ziel): <span id="targetRoasLabel">4.0×</span></div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="kpi">
+              <h3>Break-even ROAS</h3>
+              <div class="val" id="beRoas">0.0×</div>
+              <div class="note">ROAS, bei dem DB3 = 0</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="kpi">
+              <h3>Erforderlicher Umsatz für Ziel-ROAS</h3>
+              <div class="val" id="revForTarget">€0</div>
+              <div class="note">= Ziel-ROAS × Ads</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="kpi">
+              <h3>Max. CPA bei Ziel-ROAS</h3>
+              <div class="val" id="maxCPA">€0</div>
+              <div class="note">= AOV / Ziel-ROAS</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="kpi">
+              <h3>Max. CPC (optional)</h3>
+              <div class="val" id="maxCPC">€0</div>
+              <div class="note">= max CPA × Conversion Rate</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Explanations -->
+      <section class="card span-5">
+        <h2 style="margin:0 0 8px 0;font-size:18px">Kurz erklärt</h2>
+        <p class="note">DB1 = Umsatz − variable Kosten. DB2 = DB1 − Google Ads − produktbezogene Fixkosten. DB3 = DB2 − weitere Fixkosten (z.B. Team). ROAS = Umsatz / Google Ads. 
+        Ziel-ROAS hilft, Budgets und Gebote zu steuern. Break-even ROAS zeigt, ab wann sich Kampagnen nach allen Kosten lohnen.</p>
+        <div class="pill" id="statusPill">Status: —</div>
+      </section>
+    </div>
+
+    <div class="footer">Teile einfach diese einzelne HTML-Datei mit dem Kunden. Eingaben werden automatisch lokal gespeichert (localStorage). Export als CSV (Excel) möglich.</div>
+  </div>
+
+  <script>
+    const $ = (id)=>document.getElementById(id);
+    const money = (n)=>`€${(n||0).toLocaleString(undefined,{maximumFractionDigits:2,minimumFractionDigits:2})}`;
+    const num = (n)=>isFinite(+n)?+n:0;
+
+    const inputs = ["price","qty","varPerUnit","productFixed","adSpend","otherFixed","targetROAS","convRate"];  
+    inputs.forEach(id=>$(id).addEventListener('input',calc));
+    $("resetBtn").addEventListener('click',()=>{inputs.forEach(id=>$(id).value='');$("price").value=49;$("qty").value=100;$("varPerUnit").value=18;$("productFixed").value=200;$("adSpend").value=1200;$("otherFixed").value=1500;$("targetROAS").value=4;$("convRate").value=0.02;calc();});
+
+    function calc(){
+      const price = num($("price").value);
+      const qty = Math.max(0,num($("qty").value));
+      const varPerUnit = Math.max(0,num($("varPerUnit").value));
+      const productFixed = Math.max(0,num($("productFixed").value));
+      const adSpend = Math.max(0,num($("adSpend").value));
+      const otherFixed = Math.max(0,num($("otherFixed").value));
+      const targetROAS = Math.max(0.1,num($("targetROAS").value));
+      const convRate = Math.max(0,Math.min(1,num($("convRate").value)));
+
+      const revenue = price*qty; // Umsatz
+      const aov = qty? revenue/qty : price; // Durchschnittlicher Warenkorb
+      const variableCosts = varPerUnit*qty;
+
+      const db1 = revenue - variableCosts;
+      const db2 = db1 - adSpend - productFixed; // Ads + produktfixe Kosten
+      const db3 = db2 - otherFixed; // übrige Fixkosten
+
+      const roas = adSpend>0 ? revenue/adSpend : 0;
+      const mer = adSpend>0 ? revenue/adSpend : Infinity; // hier identisch zu ROAS da nur Google Ads eingerechnet
+      const beRoas = adSpend>0 ? (variableCosts + productFixed + otherFixed + adSpend)/adSpend : 0; // DB3=0
+
+      const revForTarget = adSpend * targetROAS;
+      const maxCPA = targetROAS>0 ? aov/targetROAS : 0;
+      const maxCPC = convRate>0 ? maxCPA*convRate : 0;
+
+      // Fill UI
+      $("rev").textContent = money(revenue);
+      $("aov").textContent = `AOV ${money(aov)}`;
+      $("varCost").textContent = money(variableCosts);
+      $("db1").textContent = money(db1);
+      $("db2").textContent = money(db2);
+      $("db3").textContent = money(db3);
+      $("roas").textContent = `${roas.toFixed(2)}×`;
+      $("mer").textContent = `MER (≈ ROAS): ${adSpend>0?roas.toFixed(2):'—'}×`;
+      $("targetRoasLabel").textContent = `${targetROAS.toFixed(1)}×`;
+      $("roasStatus").textContent = `${roas.toFixed(1)}×`;
+      $("beRoas").textContent = adSpend>0?`${beRoas.toFixed(2)}×`:'—';
+      $("revForTarget").textContent = money(revForTarget);
+      $("maxCPA").textContent = money(maxCPA);
+      $("maxCPC").textContent = convRate>0?money(maxCPC):'—';
+
+      // Status pill
+      const pill = $("statusPill");
+      let status = '—';
+      pill.classList.remove('good','warn','bad');
+      if(adSpend===0){status = 'Kein Ads-Budget'; pill.classList.add('warn');}
+      else if(roas >= targetROAS && db3>=0){status = 'Auf Kurs (Ziel-ROAS erreicht & profitabel)'; pill.classList.add('good');}
+      else if(roas >= targetROAS && db3<0){status = 'ROAS okay, aber nach Fixkosten negativ'; pill.classList.add('warn');}
+      else {status = 'Unter Ziel-ROAS'; pill.classList.add('bad');}
+      pill.textContent = `Status: ${status}`;
+    }
+  </script>
+
+  <!-- Add-on: Persistence + CSV export (no external libs) -->
+  <script>
+    (function(){
+      const STORAGE_KEY = 'db_roas_calc_v1';
+      const ids = ["price","qty","varPerUnit","productFixed","adSpend","otherFixed","targetROAS","convRate"];  
+      const g = (id)=>document.getElementById(id);
+
+      function saveState(){
+        const state = Object.fromEntries(ids.map(id=>[id, g(id)?.value]));
+        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+      }
+      function loadState(){
+        try{
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if(!raw) return;
+          const state = JSON.parse(raw);
+          ids.forEach(id=>{ if(state[id]!==undefined && g(id)) g(id).value = state[id]; });
+        }catch(e){}
+      }
+      function compute(){
+        const price = +g("price").value||0;
+        const qty = Math.max(0,+g("qty").value||0);
+        const varPerUnit = Math.max(0,+g("varPerUnit").value||0);
+        const productFixed = Math.max(0,+g("productFixed").value||0);
+        const adSpend = Math.max(0,+g("adSpend").value||0);
+        const otherFixed = Math.max(0,+g("otherFixed").value||0);
+        const targetROAS = Math.max(0.1,+g("targetROAS").value||0);
+        const convRate = Math.max(0,Math.min(1,+g("convRate").value||0));
+
+        const revenue = price*qty;
+        const aov = qty? revenue/qty : price;
+        const variableCosts = varPerUnit*qty;
+        const db1 = revenue - variableCosts;
+        const db2 = db1 - adSpend - productFixed;
+        const db3 = db2 - otherFixed;
+        const roas = adSpend>0 ? revenue/adSpend : 0;
+        const beRoas = adSpend>0 ? (variableCosts + productFixed + otherFixed + adSpend)/adSpend : 0;
+        const revForTarget = adSpend * targetROAS;
+        const maxCPA = targetROAS>0 ? aov/targetROAS : 0;
+        const maxCPC = convRate>0 ? maxCPA*convRate : 0;
+        return {revenue,aov,variableCosts,db1,db2,db3,roas:+roas.toFixed(2),beRoas:+beRoas.toFixed(2),revForTarget,maxCPA,maxCPC};
+      }
+
+      // save on input
+      ids.forEach(id=>{ const el = g(id); if(el){ el.addEventListener('input', saveState); }});
+
+      // extend reset to also clear
+      const reset = g('resetBtn');
+      if(reset){ reset.addEventListener('click', ()=>{ try{ localStorage.removeItem(STORAGE_KEY);}catch(e){}; saveState(); }); }
+
+      // CSV export
+      const dl = g('downloadBtn');
+      if(dl){ dl.addEventListener('click', ()=>{
+        const s = Object.fromEntries(ids.map(id=>[id, g(id)?.value]));
+        const o = compute();
+        const rows = [];
+        rows.push(['Section','Metric','Value']);
+        rows.push(['Inputs','Preis pro Einheit', s.price]);
+        rows.push(['Inputs','Menge', s.qty]);
+        rows.push(['Inputs','Variable Kosten/Einheit', s.varPerUnit]);
+        rows.push(['Inputs','Produktfixe Kosten', s.productFixed]);
+        rows.push(['Inputs','Google Ads Ausgaben', s.adSpend]);
+        rows.push(['Inputs','Weitere Fixkosten', s.otherFixed]);
+        rows.push(['Inputs','Gewünschter ROAS', s.targetROAS]);
+        rows.push(['Inputs','Conversion Rate', s.convRate]);
+        rows.push(['Outputs','Umsatz', o.revenue]);
+        rows.push(['Outputs','AOV', o.aov]);
+        rows.push(['Outputs','Variable Kosten', o.variableCosts]);
+        rows.push(['Outputs','DB1', o.db1]);
+        rows.push(['Outputs','DB2', o.db2]);
+        rows.push(['Outputs','DB3', o.db3]);
+        rows.push(['Outputs','ROAS', o.roas]);
+        rows.push(['Outputs','Break-even ROAS', o.beRoas]);
+        rows.push(['Outputs','Umsatz für Ziel-ROAS', o.revForTarget]);
+        rows.push(['Outputs','Max CPA', o.maxCPA]);
+        rows.push(['Outputs','Max CPC', o.maxCPC]);
+        const csv = rows.map(r=>r.map(x=>`"${(x??'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download='db_roas_calculator.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      });}
+
+      // load persisted values before first calc
+      loadState();
+      try{ calc(); }catch(e){}
+    })();
+  </script>
+</body>
+</html>
