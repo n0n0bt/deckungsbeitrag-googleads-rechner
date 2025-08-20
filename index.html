@@ -44,9 +44,11 @@
     .note{font-size:12px;color:#9aa7bd}
     .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid #1f2937;border-radius:999px;padding:8px 10px;background:#0b1020}
     .btn{cursor:pointer;border:none;border-radius:12px;padding:10px 12px;color:#0b1020;background:#defc59;font-weight:700}
+    .anleitung{cursor:pointer;border:none;padding:10px 12px;color:#defc59;background:none;font-weight:700; display: inline-flex;}
     .btn-copy{background:linear-gradient(90deg,#defc59,#facc15);color:#0b1020}
     .btn:active{transform:translateY(1px)}
     .footer{margin-top:14px;font-size:12px;color:#94a3b8}
+    a{color:#defc59;text-decoration:none}
     .hr{height:1px;background:#1f2937;margin:12px 0}
   </style>
 </head>
@@ -180,10 +182,16 @@
       </section>
     </div>
 
-    <div style="display: flex; justify-content:space-between; margin-top: 1rem;">
-      <div class="footer">Alle Daten bleiben lokal gespeichert. Über den Copy-URL-Button können Sie den Link bequem teilen. Export als CSV (Excel) möglich.</div>
-      <button class="btn btn-copy" id="copyUrlBtn" title="Copy URL">Copy URL</button>
+    <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+      <div class="footer">
+        Alle Daten bleiben lokal gespeichert. Über den Copy-URL-Button können Sie den Link bequem teilen. Export als CSV (Excel) möglich.
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <a class="anleitung" href="/anleitung" title="Anleitung">Anleitung</a>
+        <button class="btn btn-copy" id="copyUrlBtn" title="Copy URL">Copy URL</button>
+      </div>
     </div>
+    <footer class="footer">Fragen oder Feedback? Melde dich gern bei <a href="https://skalar.marketing" target="_blank">Skalar Marketing</a>. Viel Erfolg beim Optimieren deiner Google‑Ads‑Performance! 🚀</footer>
 
   </div>
 

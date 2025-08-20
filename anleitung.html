@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Anleitung: Deckungsbeitrag (DB1/DB2/DB3) & ROAS Rechner – Nutzung & Snippets</title>
+  <meta name="description" content="Schritt-für-Schritt-Anleitung für den Deckungsbeitrag & ROAS Rechner. Erklärt Eingaben, Ausgaben, ROAS-Ziele, CSV-Export, Copy-URL und Best Practices – mit Code-Snippets."/>
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--muted:#334155;--text:#e5e7eb;--accent:#defc59;--code:#0b1020}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:linear-gradient(180deg,#0b1220,#0f172a);color:var(--text)}
+    .wrap{max-width:1380px;margin:0 auto;padding:28px 20px}
+    h1{font-size:clamp(22px,3.2vw,36px);margin:0 0 10px}
+    h2{margin:28px 0 12px;font-size:20px}
+    h3{margin:20px 0 8px;font-size:16px;color:#cbd5e1}
+    p{line-height:1.65;color:#cbd5e1}
+    .note{color:#94a3b8;font-size:14px}
+    .card{background:rgba(17,24,39,.8);border:1px solid #1f2937;border-radius:16px;padding:18px;margin:14px 0}
+    .kbd{display:inline-block;border:1px solid #1f2937;background:#0b1020;padding:2px 6px;border-radius:6px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    pre{background:var(--code);border:1px solid #1f2937;border-radius:12px;padding:14px;overflow:auto}
+    code{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;color:#e5e7eb}
+    ul{padding-left:18px}
+    .ok{color:#22c55e}
+    .warn{color:#f59e0b}
+    .bad{color:#ef4444}
+    a{color:var(--accent);text-decoration:none}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+    .span-6{grid-column:span 12}
+    @media(min-width:900px){.span-6{grid-column:span 6}}
+    .footer{margin-top:30px;color:#94a3b8;font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Anleitung – Deckungsbeitrag & ROAS Rechner</h1>
+      <p class="note">Diese Seite erklärt die Nutzung des Rechners, alle Eingaben/Ausgaben und zeigt Code-Snippets (SEO-Head, Copy-URL, CSV-Export). Ideal zum Teilen mit Kund:innen.</p>
+    </header>
+
+    <section class="card">
+      <h2>1) Quick Start</h2>
+      <ol>
+        <li>Öffne den Rechner unter <span class="kbd">https://deckungsbeitrag-rechner.statichost.eu/</span>.</li>
+        <li>Trage deine Werte ein (Preis, Menge, variable Kosten, Google Ads Ausgaben, etc.).</li>
+        <li>Setze deinen <strong>Ziel-ROAS</strong> (z. B. 4 = 400%).</li>
+        <li>Ergebnisse erscheinen sofort: <strong>DB1, DB2, DB3, ROAS, Break-even ROAS, max. CPA/CPC</strong>.</li>
+        <li>Mit <strong>Download CSV</strong> exportierst du die Daten nach Excel. Mit <strong>Copy URL</strong> kopierst du den Link.</li>
+      </ol>
+      <p class="note">Alle Eingaben werden automatisch im Browser gespeichert (localStorage). Beim nächsten Besuch sind die Werte wieder da.</p>
+    </section>
+
+    <section class="card">
+      <h2>2) Eingaben (Inputs)</h2>
+      <div class="grid">
+        <div class="span-6">
+          <h3>Pflichtfelder</h3>
+          <ul>
+            <li><b>Preis pro Einheit (€)</b> – Verkaufspreis pro Stück.</li>
+            <li><b>Menge</b> – verkaufte Einheiten im betrachteten Zeitraum.</li>
+            <li><b>Variable Kosten/Einheit (€)</b> – z. B. Material, Versand, Payment-Gebühren pro Stück.</li>
+            <li><b>Google Ads Ausgaben (€)</b> – Werbekosten im Zeitraum.</li>
+          </ul>
+        </div>
+        <div class="span-6">
+          <h3>Optional / ergänzend</h3>
+          <ul>
+            <li><b>Produktfixe Kosten (€)</b> – direkte, aber fixe Kosten fürs Produkt (z. B. Design, Setup).</li>
+            <li><b>Weitere Fixkosten (€)</b> – Overhead (Team, Miete, Tools).</li>
+            <li><b>Conversion Rate (0–1)</b> – optional für <i>max. CPC</i>-Abschätzung.</li>
+            <li><b>Ziel-ROAS</b> – gewünschter ROAS, steuert max. CPA/CPC-Benchmarks.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3) Ausgaben (KPIs)</h2>
+      <ul>
+        <li><b>Umsatz</b> = Preis × Menge</li>
+        <li><b>Variable Kosten</b> = variable Kosten/Einheit × Menge</li>
+        <li><b>DB1</b> = Umsatz − variable Kosten</li>
+        <li><b>DB2</b> = DB1 − Google Ads − produktfixe Kosten</li>
+        <li><b>DB3</b> = DB2 − weitere Fixkosten (≈ Gewinn vor Steuern)</li>
+        <li><b>ROAS</b> = Umsatz / Google Ads</li>
+        <li><b>Break-even ROAS</b> – ROAS, bei dem <b>DB3 = 0</b></li>
+        <li><b>Max. CPA</b> = AOV / Ziel-ROAS &nbsp;&nbsp;(<span class="note">AOV = Umsatz / Menge</span>)</li>
+        <li><b>Max. CPC</b> = max. CPA × Conversion Rate</li>
+      </ul>
+      <p class="note">Status-Badge zeigt auf einen Blick: <span class="ok">auf Kurs</span>, <span class="warn">kritisch</span> oder <span class="bad">unter Ziel</span>.</p>
+    </section>
+
+    <section class="card">
+      <h2>4) Beispielrechnung</h2>
+      <p>Beispielwerte: Preis €49, Menge 100, Var. Kosten/Einheit €18, Ads €1.200, Produktfix €200, Fixkosten €1.500, Ziel‑ROAS 4, CR 2 %.</p>
+      <ul>
+        <li>Umsatz = 49 × 100 = <b>€4.900</b></li>
+        <li>Variable Kosten = 18 × 100 = <b>€1.800</b></li>
+        <li>DB1 = 4.900 − 1.800 = <b>€3.100</b></li>
+        <li>DB2 = 3.100 − 1.200 − 200 = <b>€1.700</b></li>
+        <li>DB3 = 1.700 − 1.500 = <b>€200</b></li>
+        <li>ROAS = 4.900 / 1.200 ≈ <b>4,08×</b></li>
+        <li>max. CPA = (AOV 49) / 4 = <b>€12,25</b></li>
+        <li>max. CPC (CR 2 %) = 12,25 × 0,02 = <b>€0,245</b></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>5) CSV-Export</h2>
+      <p>Mit <b>Download CSV</b> werden die wichtigsten Eingaben & Kennzahlen in eine Excel‑freundliche CSV heruntergeladen.</p>
+      <h3>Snippet – CSV erstellen (vereinfacht)</h3>
+      <pre><code>const rows = [
+  ['Section','Metric','Value'],
+  ['Inputs','Preis', price],
+  ['Inputs','Menge', qty],
+  ['Outputs','Umsatz', revenue],
+  ['Outputs','DB1', db1],
+  ['Outputs','DB2', db2],
+  ['Outputs','DB3', db3],
+  ['Outputs','ROAS', roas]
+];
+const csv = rows.map(r => r.map(x => `"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
+const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url; a.download = 'db_roas_calculator.csv'; a.click();
+URL.revokeObjectURL(url);
+</code></pre>
+    </section>
+
+    <section class="card">
+      <h2>6) Best Practices</h2>
+      <ul>
+        <li><b>Datenhygiene:</b> Zeitraum konsistent halten (z. B. Kalendermonat).</li>
+        <li><b>ROAS‑Ziel realistisch</b> setzen (Branche/Marge beachten).</li>
+        <li><b>CSV</b> exportieren und Ergebnisse im Team teilen.</li>
+        <li><b>Copy URL</b> nutzen, wenn Kund:innen schnell den Rechnerlink brauchen.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>7) Troubleshooting</h2>
+      <ul>
+        <li><b>Clipboard funktioniert nicht?</b> Stelle sicher, dass die Seite über <span class="kbd">https://</span> oder <span class="kbd">http://localhost</span> läuft.</li>
+        <li><b>Werte weg?</b> Browser‑Storage geleert? – Einfach neu eingeben oder CSV nutzen.</li>
+        <li><b>ROAS wirkt „zu gut“?</b> Prüfe, ob alle relevanten Kosten (Produktfix, Overhead) befüllt sind.</li>
+      </ul>
+    </section>
+
+    <footer class="footer">Fragen oder Feedback? Melde dich gern bei <a href="https://skalar.marketing" target="_blank">Skalar Marketing</a>. Viel Erfolg beim Optimieren deiner Google‑Ads‑Performance! 🚀</footer>
+  </div>
+</body>
+</html>
